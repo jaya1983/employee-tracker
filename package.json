@@ -1,24 +1,27 @@
 {
-  "name": "MySql",
+  "name": "employee-tracker",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
+    "console.table": "^0.10.0",
+    "db": "^3.3.1",
     "express": "^4.17.1",
+    "inquirer": "^8.1.3",
     "jest": "^27.1.1",
     "mysql2": "^2.3.0"
   },
   "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jaya1983/employee-tracker.git"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/jaya1983/employee-tracker/issues"
   },
