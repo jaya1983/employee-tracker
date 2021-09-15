@@ -17,39 +17,39 @@ function showPrompts() {
       choices: [
         {
           name: "View All Departments",
-          value: "VIEW_DEPARTMENTS"
+          value: "VIEW_DEPARTMENTS",
         },
         {
           name: "View All Roles",
-          value: "VIEW_ROLES"
+          value: "VIEW_ROLES",
         },
         {
           name: "View All Employees",
-          value: "VIEW_EMPLOYEES"
+          value: "VIEW_EMPLOYEES",
         },
 
         {
           name: "Add a Department",
-          value: "ADD_DEPARTMENT"
+          value: "ADD_DEPARTMENT",
         },
         {
           name: "Add a Role",
-          value: "ADD_ROLE"
+          value: "ADD_ROLE",
         },
         {
           name: "Add an Employee",
-          value: "ADD_EMPLOYEE"
+          value: "ADD_EMPLOYEE",
         },
         {
           name: "Update Employee Role",
-          value: "UPDATE_EMPLOYEE_ROLE"
+          value: "UPDATE_EMPLOYEE_ROLE",
         },
         {
           name: "Quit",
-          value: "QUIT"
-        }
-      ]
-    }
+          value: "QUIT",
+        },
+      ],
+    },
   ]).then((res) => {
     let choice = res.choice;
     // Call the functions from what the user selects
@@ -81,7 +81,6 @@ function showPrompts() {
   });
 }
 
-
 function viewAllDepartments() {
   return connection
     .promise()
@@ -89,30 +88,127 @@ function viewAllDepartments() {
     .then(([result]) => {
       console.log("\n");
       console.table(result);
-    }).then(() => showPrompts());    
+    })
+    .then(() => showPrompts());
 }
 
 function viewAllRoles() {
-    return connection
-      .promise()
-      .query("SELECT * FROM role;")
-      .then(([result]) => {
-        console.log("\n");
-        console.table(result);
-      })
-      .then(() => showPrompts());
-  }
-
-  function viewAllEmployees() {
-    return connection
+  return connection
     .promise()
-    .query("SELECT * FROM employee;")
+    .query("SELECT * FROM role;")
     .then(([result]) => {
       console.log("\n");
       console.table(result);
     })
     .then(() => showPrompts());
-  }
+}
+
+function viewAllEmployees() {
+  return connection
+    .promise()
+    .query("select * from employee")
+    .then(([result]) => {
+      console.log("\n");
+      console.table(result);
+    })
+    .then(() => showPrompts());
+}
+
+function createDepartment() {
+  prompt([
+    {
+      type: "input",
+      name: "name",
+      message: "what is the name of the department you would like to add? ",
+    },
+  ]).then((response) => {
+    return connection
+      .promise()
+      .query("INSERT INTO department SET ?;", response)
+      .then(() => {
+        console.log(
+          `Department with name`,
+          response.name,
+          `added to the database `
+        );
+      })
+      .then(() => showPrompts());
+  });
+}
+
+/* create a new Employee */
+function createEmployee() {
+
+    prompt([
+    {
+      type: "input",
+      name: "first_name",
+      message: "what is the first name of the employee? ",
+    },
+    {
+      type: "input",
+      name: "last_name",
+      message: "what is the last name of the employee? ",
+    },
+    {
+      type: "input",
+      name: "role_id",
+      message: "what role id will this employee work for? ",
+    },
+    {
+      type: "input",
+      name: "manager_id",
+      message: "who is the manager for this employee? ",
+     
+    },
+  ]).then((response) => {
+    return connection
+      .promise()
+      .query("INSERT INTO employee SET ?;", response)
+      .then(() => {
+        console.log(
+          `Employee with name "`,
+          response.first_name, response.last_name,
+          `" added to the database `
+        );
+      })
+      .then(() => showPrompts());
+  });
+}
+
+/* create a new Role */
+function createRole() {
+  prompt([
+    {
+      type: "input",
+      name: "title",
+      message: "what is the title of the role you would like to add? ",
+    },
+    {
+      type: "input",
+      name: "salary",
+      message: "what is the expected salary for this role? ",
+    },
+    {
+      type: "input",
+      name: "department_id",
+      message: "what department id will this role come under? ",
+    },
+  ]).then((response) => {
+    return connection
+      .promise()
+      .query("INSERT INTO role SET ?;", response)
+      .then(() => {
+        console.log(
+          `Role with name "`,
+          response.title,
+          `" added to the database `
+        );
+      })
+      .then(() => showPrompts());
+  });
+}
+
 function quit() {
-    exit();
+  exit();
 }
