@@ -1,6 +1,8 @@
 const { prompt } = require("inquirer");
 const { exit } = require("process");
 const connection = require("./db/connection");
+// const { addEmployee } = require("./db/helper");
+const helper = require("./db/helper");
 
 function init() {
   showPrompts();
@@ -82,36 +84,21 @@ function showPrompts() {
 }
 
 function viewAllDepartments() {
-  return connection
-    .promise()
-    .query("SELECT * FROM department;")
-    .then(([result]) => {
-      console.log("\n");
-      console.table(result);
-    })
-    .then(() => showPrompts());
+  helper.viewDepartments().then(() => {
+    showPrompts();
+  });
 }
 
 function viewAllRoles() {
-  return connection
-    .promise()
-    .query("SELECT * FROM role;")
-    .then(([result]) => {
-      console.log("\n");
-      console.table(result);
-    })
-    .then(() => showPrompts());
+  helper.viewRoles().then(() => {
+    showPrompts();
+  });
 }
 
 function viewAllEmployees() {
-  return connection
-    .promise()
-    .query("select * from employee")
-    .then(([result]) => {
-      console.log("\n");
-      console.table(result);
-    })
-    .then(() => showPrompts());
+  helper.viewEmployees().then(() => {
+    showPrompts();
+  });
 }
 
 function createDepartment() {
@@ -122,24 +109,17 @@ function createDepartment() {
       message: "what is the name of the department you would like to add? ",
     },
   ]).then((response) => {
-    return connection
-      .promise()
-      .query("INSERT INTO department SET ?;", response)
-      .then(() => {
-        console.log(
-          `Department with name`,
-          response.name,
-          `added to the database `
-        );
-      })
-      .then(() => showPrompts());
+    console.log("department name", response);
+    let department = response;
+    helper.addDepartment(department).then((result) => {
+      showPrompts();
+    });
   });
 }
 
 /* create a new Employee */
 function createEmployee() {
-
-    prompt([
+  prompt([
     {
       type: "input",
       name: "first_name",
@@ -150,32 +130,39 @@ function createEmployee() {
       name: "last_name",
       message: "what is the last name of the employee? ",
     },
-    {
-      type: "input",
-      name: "role_id",
-      message: "what role id will this employee work for? ",
-    },
-    {
-      type: "input",
-      name: "manager_id",
-      message: "who is the manager for this employee? ",
-     
-    },
   ]).then((response) => {
-    return connection
-      .promise()
-      .query("INSERT INTO employee SET ?;", response)
-      .then(() => {
-        console.log(
-          `Employee with name "`,
-          response.first_name, response.last_name,
-          `" added to the database `
-        );
-      })
-      .then(() => showPrompts());
+    let firstName = response.first_name;
+    let lastName = response.last_name;
+    helper.viewRoles().then((result) => {
+      prompt({
+        type: "input",
+        name: "role_id",
+        message: "what role will this employee work for? ",
+        choices: result,
+      }).then((role) => {
+        helper.viewEmployees().then((result) => {
+          prompt({
+            type: "input",
+            name: "manager_id",
+            message: "what manager will this employee work for? ",
+            choices: result,
+          }).then((res) => {
+            let newEmployee = {
+              first_name: firstName,
+              last_name: lastName,
+              role_id: role.role_id,
+              manager_id: res.manager_id,
+            };
+            helper.addEmployee(newEmployee).then((result) => {
+              console.log(`Added " ${firstName} ${lastName} " to the database`);
+              showPrompts();
+            });
+          });
+        });
+      });
+    });
   });
 }
-
 /* create a new Role */
 function createRole() {
   prompt([
@@ -195,18 +182,20 @@ function createRole() {
       message: "what department id will this role come under? ",
     },
   ]).then((response) => {
-    return connection
-      .promise()
-      .query("INSERT INTO role SET ?;", response)
-      .then(() => {
-        console.log(
-          `Role with name "`,
-          response.title,
-          `" added to the database `
-        );
-      })
-      .then(() => showPrompts());
+    let newRole = {
+      title: response.title,
+      salary: response.salary,
+      department_id: response.department_id,
+    };
+    helper.addRole(newRole).then(() => {
+      console.log(`Added " ${newRole.title}  " to the database`);
+      showPrompts();
+    });
   });
+}
+
+function updateEmployeeRole() {
+    
 }
 
 function quit() {
