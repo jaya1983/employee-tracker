@@ -1,6 +1,5 @@
 const { prompt } = require("inquirer");
 const { exit } = require("process");
-// const connection = require("./db/connection");
 const helper = require("./db/helper");
 
 function init() {
