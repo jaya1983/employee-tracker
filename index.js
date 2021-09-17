@@ -1,7 +1,6 @@
 const { prompt } = require("inquirer");
 const { exit } = require("process");
-const connection = require("./db/connection");
-// const { addEmployee } = require("./db/helper");
+// const connection = require("./db/connection");
 const helper = require("./db/helper");
 
 function init() {
@@ -84,19 +83,22 @@ function showPrompts() {
 }
 
 function viewAllDepartments() {
-  helper.viewDepartments().then(() => {
+  helper.viewDepartments().then(([result]) => {
+    console.table(result);
     showPrompts();
   });
 }
 
 function viewAllRoles() {
-  helper.viewRoles().then(() => {
+  helper.viewRoles().then(([result]) => {
+    console.table(result);
     showPrompts();
   });
 }
 
 function viewAllEmployees() {
-  helper.viewEmployees().then(() => {
+  helper.viewEmployees().then(([result]) => {
+    console.table(result);
     showPrompts();
   });
 }
@@ -109,9 +111,8 @@ function createDepartment() {
       message: "what is the name of the department you would like to add? ",
     },
   ]).then((response) => {
-    console.log("department name", response);
-    let department = response;
-    helper.addDepartment(department).then((result) => {
+    helper.addDepartment(response).then(() => {
+      console.log("department ", response, "added to the database ");
       showPrompts();
     });
   });
@@ -133,18 +134,22 @@ function createEmployee() {
   ]).then((response) => {
     let firstName = response.first_name;
     let lastName = response.last_name;
-    helper.viewRoles().then((result) => {
+    helper.viewRoles().then(([result]) => {
+      console.table(result);
       prompt({
         type: "input",
         name: "role_id",
-        message: "what role will this employee work for? ",
+        message:
+          "what roleId will this employee work for? Please select an id from role title ",
         choices: result,
       }).then((role) => {
-        helper.viewEmployees().then((result) => {
+        helper.viewEmployees().then(([result]) => {
+          console.table(result);
           prompt({
             type: "input",
             name: "manager_id",
-            message: "what manager will this employee work for? ",
+            message:
+              "what managerId will this employee work for?, Please select an employee Id ",
             choices: result,
           }).then((res) => {
             let newEmployee = {
@@ -176,28 +181,70 @@ function createRole() {
       name: "salary",
       message: "what is the expected salary for this role? ",
     },
-    {
-      type: "input",
-      name: "department_id",
-      message: "what department id will this role come under? ",
-    },
   ]).then((response) => {
-    let newRole = {
-      title: response.title,
-      salary: response.salary,
-      department_id: response.department_id,
-    };
-    helper.addRole(newRole).then(() => {
-      console.log(`Added " ${newRole.title}  " to the database`);
-      showPrompts();
+    helper.viewDepartments().then(([result]) => {
+      let roleTitle = response.title;
+      let roleSalary = response.salary;
+      console.table(result);
+      prompt({
+        type: "input",
+        name: "department_id",
+        message: "what department id will this role come under? ",
+      }).then((response) => {
+        let newRole = {
+          title: roleTitle,
+          salary: roleSalary,
+          department_id: response.department_id,
+        };
+        helper.addRole(newRole).then(() => {
+          console.log(`Added " ${newRole.title}  " to the database`);
+          showPrompts();
+        });
+      });
     });
   });
 }
 
+// Update an employee's role
 function updateEmployeeRole() {
-    
-}
+  helper.viewEmployees().then(([rows]) => {
+    let employees = rows;
+    const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
+      value: id,
+    }));
 
+    prompt([
+      {
+        type: "list",
+        name: "employeeId",
+        message: "Which employee's role do you want to update?",
+        choices: employeeChoices,
+      },
+    ]).then((res) => {
+      let employeeId = res.employeeId;
+      helper.viewRoles().then(([rows]) => {
+        let roles = rows;
+        const roleChoices = roles.map(({ id, title }) => ({
+          name: title,
+          value: id,
+        }));
+
+        prompt([
+          {
+            type: "list",
+            name: "roleId",
+            message: "What's the new role of this employee?",
+            choices: roleChoices,
+          },
+        ])
+          .then((res) => helper.updateEmployeeRole(employeeId, res.roleId))
+          .then(() => console.log("Employee's role is updated"))
+          .then(() => showPrompts());
+      });
+    });
+  });
+}
 function quit() {
   exit();
 }
