@@ -1,7 +1,7 @@
-# Employee Tracker
 
 * Github : https://jaya1983.github.io/employee-tracker/
-* Walkthrough video : 
+
+* Walkthrough video : https://drive.google.com/file/d/1wnICVkM23YnLTKo13X_HjFGCAP062i7W/view
 
 # Description
 * A command-line application to manage a company's employee database, using Node.js, Inquirer, and MySQL.
